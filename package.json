@@ -1,0 +1,18 @@
+{
+  "name": "logosmap",
+  "version": "0.1.0",
+  "private": true,
+  "description": "지도 기반 성경 지명·인물 학습 서비스 (확장 가능한 멀티 도메인 아키텍처의 첫 도메인)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "vite": "^8.2.1"
+  }
+}

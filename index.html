@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성경 지명·인물 통합 지도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="header-row1">
+    <div>
+      <div class="logo">Bible Atlas</div>
+      <div class="title-ko">성경 지명·인물 통합 지도</div>
+    </div>
+    <div id="textZoomCtrl" style="margin-left:auto;display:flex;align-items:center;gap:2px;border:1px solid var(--border);border-radius:6px;background:var(--surface);padding:2px;">
+      <button onclick="setTextZoom(-1)" title="팝업 글자·크기 작게" style="width:24px;height:24px;border:none;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;">가−</button>
+      <span id="textZoomLabel" onclick="setTextZoom(0)" title="기본 크기로" style="width:38px;text-align:center;font-size:10px;color:var(--muted);cursor:pointer;user-select:none;">100%</span>
+      <button onclick="setTextZoom(1)" title="팝업 글자·크기 크게" style="width:24px;height:24px;border:none;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;">가+</button>
+    </div>
+    <input type="text" class="search-box" id="searchBox" placeholder="지명·인물 검색..." style="width:200px">
+  </div>
+  <div class="header-row2">
+    <div class="map-tabs" id="mapTabs">
+      <!-- 인물 탭 200여 개는 src/data/person-tabs.js 데이터로 src/ui/tabs.js가 여기에 동적으로 채운다.
+           (원본 HTML은 이 버튼들을 전부 하드코딩하고 있었다) -->
+    </div>
+  </div>
+</header>
+
+<div class="sidebar">
+  <div class="legend">
+    <div id="legend-title-all" style="margin-bottom:6px">
+      <button id="btn-view-all" onclick="viewAll()" style="width:100%;font-size:11px;padding:5px 8px;border-radius:4px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;font-weight:600">🌐 전체 (구약+신약)</button>
+      <button id="btn-view-xrefs" onclick="viewXrefs()" style="width:100%;font-size:11px;padding:5px 8px;border-radius:4px;border:1px solid rgba(200,168,74,0.4);background:rgba(200,168,74,0.08);color:#c8a84a;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:600;margin-top:5px">🔗 구약·신약 연결 보기</button>
+    </div>
+    <div id="legend-title-ot" class="legend-title" style="margin-bottom:3px;display:flex;align-items:center;justify-content:space-between">
+      <span>📅 시대별 (구약)</span>
+      <button id="btn-ot-all" onclick="filterTestament('ot')" style="font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s">구약 전체</button>
+    </div>
+    <div id="legendItems-ot"></div>
+    <div id="legend-title-nt" class="legend-title" style="margin-top:8px;margin-bottom:3px;display:flex;align-items:center;justify-content:space-between">
+      <span>🗺 권역별 (신약)</span>
+      <button id="btn-nt-all" onclick="filterTestament('nt')" style="font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s">신약 전체</button>
+    </div>
+    <div id="legendItems-nt"></div>
+  </div>
+  <div class="place-list" id="placeList"></div>
+</div>
+
+<div id="map"></div>
+
+<div class="tile-toggle">
+  <button class="tile-btn active" data-tile="google" onclick="setTile('google')">🟦 구글 지도</button>
+  <button class="tile-btn" data-tile="dark" onclick="setTile('dark')">🌑 어두운 지도</button>
+  <button class="tile-btn" data-tile="satellite" onclick="setTile('satellite')">🛰 위성 지도</button>
+  <button class="tile-btn" data-tile="street" onclick="setTile('street')">🗺 일반 지도</button>
+</div>
+
+<div class="stats">
+  <div class="stat-chip">표시 <span id="vcnt">0</span> / <span id="tcnt">148</span></div>
+  <div class="stat-chip">표시 중: <span id="visibleCount">0</span>개</div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

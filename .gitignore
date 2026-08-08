@@ -1,3 +1,9 @@
+# Node / Vite (logosmap 프론트엔드)
+node_modules/
+dist/
+*.local
+.vite/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
