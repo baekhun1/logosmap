@@ -28,6 +28,11 @@ async function boot() {
   // 6) 팝업 위 핀치/휠 확대 — map이 이미 만들어진 뒤에 로드.
   await import('./ui/pinch-zoom.js');
   await import('./ui/wheel-zoom.js');
+
+  // 7) 모바일 사이드바 드로어 토글 — window.selectPlace(4번에서 노출됨)를 감싸야
+  //    하므로 app.js 로드 이후에 실행.
+  const { initSidebarToggle } = await import('./ui/sidebar-toggle.js');
+  initSidebarToggle();
 }
 
 boot();
