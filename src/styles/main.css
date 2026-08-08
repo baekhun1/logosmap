@@ -1,0 +1,165 @@
+/* bible_map_v22.html 원본 <style> 블록에서 이관.
+   인물별 --person 색상 커스텀 프로퍼티(원래 여기 ~200줄로 하드코딩되어 있던)는
+   src/data/persons.js(PERSON_TAB_COLORS)에서 런타임에 주입한다 — inject-person-colors.js 참고. */
+
+:root {
+  --bg:#0d0c10; --surface:#16141a; --border:#2e2a38;
+  --text:#e8e2d4; --muted:#7a7288; --accent:#c8a96e; --glow:rgba(200,169,110,0.15);
+  --c-patriarch:#5b9bd4;  /* 창조·족장 */
+  --c-exodus:#c8a84a;     /* 출애굽·광야·정복 */
+  --c-judges:#7ac47a;     /* 사사 */
+  --c-kingdom:#c44a6a;    /* 통일왕국 */
+  --c-divided:#9b7fd4;    /* 분열왕국 */
+  --c-exile:#e05c5c;      /* 포로기·귀환기 */
+  --c-prophets:#4caf8a;   /* 선지자 활동 */
+  --c-outside:#d4954a;    /* 이스라엘 외부 */
+  /* 신약 */
+  --c-galilee:   #4a9edd;
+  --c-judea:     #e05c5c;
+  --c-samaria:   #d4954a;
+  --c-syria:     #9b7fd4;
+  --c-asia:      #4caf8a;
+  --c-macedonia: #e0a030;
+  --c-rome:      #c44a6a;
+  --ui-zoom: 1;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;}
+
+header{position:fixed;top:0;left:0;right:0;z-index:1100;
+  background:rgba(13,12,16,0.96);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  padding:6px 16px;display:flex;flex-direction:column;gap:5px;}
+.header-row1{display:flex;align-items:center;gap:12px;}
+.header-row2{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-bottom:2px;}
+.logo{font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;color:var(--accent);white-space:nowrap;}
+.title-ko{font-family:'Noto Serif KR',serif;font-size:16px;font-weight:700;color:#f0ead8;white-space:nowrap;}
+.subtitle{font-size:10px;color:var(--muted);margin-top:1px;}
+.header-right{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap;}
+.search-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;
+  padding:5px 11px;color:var(--text);font-family:inherit;font-size:12px;
+  width:160px;outline:none;transition:border-color .2s;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--muted);}
+.filter-btn{padding:4px 9px;border-radius:5px;border:1px solid var(--border);
+  background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;
+  font-family:inherit;transition:all .15s;white-space:nowrap;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--glow);}
+
+.sidebar{position:fixed;left:0;top:var(--header-h,80px);bottom:0;width:270px;z-index:1000;
+  background:rgba(22,20,26,0.97);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+.legend{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;max-height:45%;overflow-y:auto;}
+.legend-title{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.legend-item{display:flex;align-items:center;gap:7px;cursor:pointer;
+  padding:3px 5px;border-radius:4px;transition:background .15s;margin-bottom:2px;}
+.legend-item:hover{background:rgba(255,255,255,.05);}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.legend-label{font-size:11px;}
+.legend-count{margin-left:auto;font-size:10px;color:var(--muted);
+  background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;}
+.place-list{flex:1;overflow-y:auto;padding:6px;}
+.place-list::-webkit-scrollbar{width:3px;}
+.place-list::-webkit-scrollbar-thumb{background:var(--border);}
+.place-item{padding:7px 9px;border-radius:5px;cursor:pointer;margin-bottom:2px;
+  transition:background .12s;display:flex;align-items:flex-start;gap:7px;
+  border:1px solid transparent;}
+.place-item:hover{background:rgba(255,255,255,.06);}
+.place-item.selected{background:var(--glow);border-color:var(--accent);}
+.pi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.pi-name{font-size:12px;font-weight:500;color:#f0ead8;}
+.pi-region{font-size:10px;color:var(--muted);margin-top:1px;}
+
+#map{position:fixed;left:270px;top:var(--header-h,80px);right:0;bottom:0;z-index:500;}
+.leaflet-container{background:#0e1825!important;font-family:'Noto Sans KR',sans-serif;}
+.leaflet-popup-content{margin:0!important;padding:0!important;
+  max-height:80vh!important;overflow-y:auto!important;overflow-x:hidden!important;
+  overscroll-behavior:contain;}
+/* 팝업 내부 스크롤바 테마 맞춤 */
+.leaflet-popup-content::-webkit-scrollbar{width:8px;}
+.leaflet-popup-content::-webkit-scrollbar-track{background:transparent;}
+.leaflet-popup-content::-webkit-scrollbar-thumb{background:rgba(200,169,110,0.35);
+  border-radius:4px;border:2px solid transparent;background-clip:padding-box;}
+.leaflet-popup-content::-webkit-scrollbar-thumb:hover{background:rgba(200,169,110,0.6);
+  background-clip:padding-box;}
+.leaflet-popup-content{scrollbar-width:thin;scrollbar-color:rgba(200,169,110,0.4) transparent;}
+.leaflet-popup-content-wrapper{background:rgba(22,20,26,0.97)!important;color:var(--text)!important;
+  border:1px solid var(--border)!important;border-radius:10px!important;
+  box-shadow:0 8px 40px rgba(0,0,0,.7)!important;max-width:min(94vw, calc(400px * var(--ui-zoom)))!important;
+  touch-action:auto!important;}
+.leaflet-popup, .leaflet-popup-content{touch-action:auto!important;}
+.leaflet-popup-tip{background:rgba(22,20,26,0.97)!important;}
+.leaflet-popup-close-button{color:var(--muted)!important;font-size:16px!important;top:10px!important;right:12px!important;}
+.leaflet-control-zoom a{background:rgba(22,20,26,0.95)!important;color:var(--text)!important;
+  border-color:var(--border)!important;font-size:16px!important;}
+.leaflet-control-zoom a:hover{background:var(--glow)!important;color:var(--accent)!important;}
+.leaflet-tile{filter:none;}
+body.tile-dark .leaflet-tile{filter:brightness(0.72) saturate(0.65) hue-rotate(200deg);}
+
+.popup-wrap{padding:10px 8px;}
+.popup-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:calc(10px * var(--ui-zoom));
+  font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.popup-name{font-family:'Noto Serif KR',serif;font-size:calc(19px * var(--ui-zoom));font-weight:700;color:#f5eed8;margin-bottom:2px;}
+.popup-name-en{font-family:'Cinzel',serif;font-size:calc(10px * var(--ui-zoom));color:var(--accent);letter-spacing:2px;margin-bottom:6px;}
+.popup-geo{font-size:calc(11px * var(--ui-zoom));color:#a0b4c8;margin-bottom:10px;line-height:1.6;}
+.popup-sec-title{font-size:calc(9px * var(--ui-zoom));letter-spacing:2px;text-transform:uppercase;color:var(--accent);
+  margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid rgba(200,169,110,0.2);}
+.popup-event{margin-bottom:7px;}
+.popup-time{display:block;font-size:calc(10px * var(--ui-zoom));color:var(--accent);margin-bottom:2px;}
+.popup-ev-body{width:100%;}
+.popup-person{font-size:calc(12px * var(--ui-zoom));font-weight:600;color:#c8e0f4;margin-bottom:1px;}
+.popup-desc{font-size:calc(11px * var(--ui-zoom));color:#aaa8b0;line-height:1.5;}
+.popup-ref{font-size:calc(10px * var(--ui-zoom));color:var(--accent);opacity:.7;margin-top:1px;}
+
+.stats{position:fixed;right:16px;bottom:20px;z-index:1000;display:flex;flex-direction:column;gap:4px;}
+.stat-chip{background:rgba(22,20,26,0.88);border:1px solid var(--border);
+  border-radius:5px;padding:3px 10px;font-size:10px;color:var(--muted);backdrop-filter:blur(4px);}
+.stat-chip span{color:var(--accent);font-weight:600;}
+.tile-toggle{position:fixed;right:16px;top:calc(var(--header-h,80px) + 10px);z-index:1200;display:flex;flex-direction:column;gap:4px;}
+.tile-btn{padding:5px 12px;border-radius:5px;border:1px solid var(--border);
+  background:rgba(22,20,26,0.97);color:#e8e2d4;font-size:11px;cursor:pointer;
+  font-family:inherit;transition:all .15s;backdrop-filter:blur(6px);
+  text-shadow:0 1px 3px rgba(0,0,0,0.9);font-weight:500;}
+.tile-btn.active,.tile-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(22,20,26,1);}
+
+
+.map-tabs{display:flex;gap:4px;background:rgba(22,20,26,.6);padding:3px;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap;max-height:92px;overflow-y:auto;align-content:flex-start;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.map-tabs::-webkit-scrollbar{width:7px}
+.map-tabs::-webkit-scrollbar-track{background:transparent}
+.map-tabs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.map-tabs::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+.map-tab{padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:500;transition:all .18s;color:var(--muted);background:transparent;white-space:nowrap}
+.map-tab:hover{background:rgba(255,255,255,.07)}
+.map-tab.active{font-weight:700}
+.map-tab[data-map="all"].active{background:rgba(255,255,255,.15);color:#fff}
+.map-tab[data-map="moses"].active{background:var(--moses);color:#111}
+.map-tab[data-map="jesus"].active{background:var(--jesus);color:#111}
+.map-tab[data-map="paul"].active{background:var(--paul);color:#fff}
+.map-tab[data-map="joshua"].active{background:var(--joshua);color:#fff}
+.map-tab[data-map="abraham"].active{background:var(--abraham);color:#fff}
+.map-tab[data-map="melchizedek"].active{background:var(--melchizedek);color:#fff}
+.map-tab[data-map="goliath"].active{background:var(--goliath);color:#fff}
+.map-tab[data-map="lot_person"].active{background:var(--lot_person);color:#fff}
+.map-tab[data-map="zechariah_elizabeth"].active{background:var(--zechariah_elizabeth);color:#fff}
+.map-tab[data-map="ananias_sapphira"].active{background:var(--ananias_sapphira);color:#fff}
+.map-tab[data-map="isaac"].active{background:var(--isaac);color:#111}
+.map-tab[data-map="jacob"].active{background:var(--jacob);color:#111}
+.map-tab[data-map="joseph"].active{background:var(--joseph);color:#111}
+.map-tab[data-map="david"].active{background:var(--david);color:#fff}
+.map-tab[data-map="samuel"].active{background:var(--samuel);color:#111}
+.map-tab[data-map="solomon"].active{background:var(--solomon);color:#111}
+.map-tab[data-map="elijah"].active{background:var(--elijah);color:#111}
+.map-tab[data-map="peter"].active{background:var(--peter);color:#fff}
+.map-tab[data-map="noah"].active{background:var(--noah);color:#111}
+.map-tab[data-map="deborah"].active{background:var(--deborah);color:#111}
+.map-tab[data-map="ruth"].active{background:var(--ruth);color:#fff}
+.map-tab[data-map="isaiah"].active{background:var(--isaiah);color:#fff}
+.map-tab[data-map="hezekiah"].active{background:var(--hezekiah);color:#fff}
+.map-tab[data-map="jeremiah"].active{background:var(--jeremiah);color:#fff}
+.map-tab[data-map="ezekiel"].active{background:var(--ezekiel);color:#fff}
+.map-tab[data-map="esther"].active{background:var(--esther);color:#fff}
+.map-tab[data-map="nehemiah"].active{background:var(--nehemiah);color:#fff}
+.map-tab[data-map="john_baptist"].active{background:var(--john_baptist);color:#111}
+.map-tab[data-map="ezra"].active{background:var(--ezra);color:#fff}
+.map-tab[data-map="jonah"].active{background:var(--jonah);color:#fff}
+
