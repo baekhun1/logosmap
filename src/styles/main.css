@@ -46,6 +46,16 @@ header{position:fixed;top:0;left:0;right:0;z-index:1100;
   font-family:inherit;transition:all .15s;white-space:nowrap;}
 .filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--glow);}
 
+/* 모바일 사이드바 토글(햄버거) 버튼 — 데스크톱에서는 숨김 (아래 모바일 미디어쿼리에서 노출) */
+.sidebar-toggle-btn{display:none;flex:none;width:34px;height:34px;border-radius:6px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font-size:16px;cursor:pointer;font-family:inherit;}
+.sidebar-toggle-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* 모바일에서 사이드바가 열렸을 때 지도 위를 덮는 반투명 배경 — 탭하면 닫힘 */
+.sidebar-backdrop{display:none;position:fixed;inset:0;top:var(--header-h,80px);
+  background:rgba(0,0,0,.5);z-index:900;}
+
 .sidebar{position:fixed;left:0;top:var(--header-h,80px);bottom:0;width:270px;z-index:1000;
   background:rgba(22,20,26,0.97);border-right:1px solid var(--border);
   display:flex;flex-direction:column;overflow:hidden;}
@@ -162,4 +172,56 @@ body.tile-dark .leaflet-tile{filter:brightness(0.72) saturate(0.65) hue-rotate(2
 .map-tab[data-map="john_baptist"].active{background:var(--john_baptist);color:#111}
 .map-tab[data-map="ezra"].active{background:var(--ezra);color:#fff}
 .map-tab[data-map="jonah"].active{background:var(--jonah);color:#fff}
+
+/* ══════════════════════════════════════════════════════════════
+   반응형 — 태블릿/모바일 (PC는 위 스타일 그대로, 아래는 재정의만)
+   ══════════════════════════════════════════════════════════════ */
+
+/* 태블릿: 사이드바를 조금 좁혀 지도 공간을 더 확보 */
+@media (max-width:1024px) and (min-width:769px){
+  .sidebar{width:230px;}
+  #map{left:230px;}
+}
+
+/* 모바일: 사이드바를 오프캔버스 드로어로 전환 */
+@media (max-width:768px){
+  .sidebar-toggle-btn{display:flex;align-items:center;justify-content:center;}
+
+  .header-row1{flex-wrap:wrap;row-gap:6px;}
+  .search-box{width:100%!important;flex:1 1 100%;order:3;}
+  #textZoomCtrl{margin-left:0!important;}
+
+  .sidebar{
+    width:min(86vw,320px);
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    box-shadow:6px 0 28px rgba(0,0,0,.55);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-backdrop.show{display:block;}
+
+  /* 사이드바가 지도를 밀어내지 않고 그 위를 덮으므로, 지도는 항상 전체 폭 */
+  #map{left:0!important;}
+
+  /* 플로팅 UI가 좁은 화면에서 서로 겹치지 않도록 축소·재배치 */
+  .tile-toggle{right:8px;top:calc(var(--header-h,80px) + 6px);gap:3px;}
+  .tile-btn{padding:6px 9px;font-size:10px;}
+  .stats{right:8px;bottom:12px;}
+  .stat-chip{font-size:9px;padding:3px 8px;}
+
+  /* 터치 타겟 확대 (최소 44px 권장 기준에 근접하게) */
+  .map-tab{padding:8px 12px;font-size:12px;}
+  .filter-btn{padding:8px 12px;font-size:12px;}
+  .tile-btn{min-height:40px;}
+  .legend-item{padding:8px 9px;min-height:40px;}
+  .place-item{padding:10px 9px;min-height:44px;}
+  .sidebar-toggle-btn{width:40px;height:40px;}
+  #textZoomCtrl button{width:32px!important;height:32px!important;}
+}
+
+/* 아주 좁은 화면(구형 소형 폰 등) — 헤더 타이틀 폭 절약 */
+@media (max-width:380px){
+  .logo{display:none;}
+  .title-ko{font-size:14px;}
+}
 
